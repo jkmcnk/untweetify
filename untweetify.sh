@@ -89,24 +89,22 @@ elif [ "$1" = "nuke" ]; then
   echo "Removing $COUNT tweets."
   split -l $BATCH -d toremove.txt toremove-
   for B in `ls toremove-*`; do
-    echo "Processing batch $B"
+    echo "Processing batch $B, started @ `date`"
+    REFRESH_TOKEN=`cat auth.json | jq .refresh_token | sed -re 's/"//g'`
+    curl --request POST 'https://api.twitter.com/2/oauth2/token' \
+      -H 'Content-Type: application/x-www-form-urlencoded' \
+      --data-urlencode "refresh_token=$REFRESH_TOKEN" \
+      --data-urlencode 'grant_type=refresh_token' \
+      --data-urlencode "client_id=$TW_CLIENT_ID" \
+      -H "Authorization: Basic $BASIC_AUTH" >nuauth.json 2>/dev/null
+    if ! grep refresh_token <nuauth.json 1>/dev/null 2>&1; then
+      rm -f nuauth.json
+      echo "Failed to authenicate."
+      exit 3
+    fi
+    mv nuauth.json auth.json
+    ACCESS_TOKEN=`cat auth.json | jq .access_token | sed -re 's/"//g'`
     for ID in `cat $B`; do
-      if [ -z "$ACCESS_TOKEN" ]; then
-        REFRESH_TOKEN=`cat auth.json | jq .refresh_token | sed -re 's/"//g'`
-        curl --request POST 'https://api.twitter.com/2/oauth2/token' \
-          -H 'Content-Type: application/x-www-form-urlencoded' \
-          --data-urlencode "refresh_token=$REFRESH_TOKEN" \
-          --data-urlencode 'grant_type=refresh_token' \
-          --data-urlencode "client_id=$TW_CLIENT_ID" \
-          -H "Authorization: Basic $BASIC_AUTH" >nuauth.json 2>/dev/null
-        if ! grep refresh_token <nuauth.json 1>/dev/null 2>&1; then
-          rm -f nuauth.json
-          echo "Failed to authenicate."
-          exit 3
-        fi
-        mv nuauth.json auth.json
-        ACCESS_TOKEN=`cat auth.json | jq .access_token | sed -re 's/"//g'`
-      fi
       RS=`curl -s -o /dev/null -w "%{http_code}" --location --request DELETE \
         "https://api.twitter.com/2/tweets/$ID" \
         -H "Authorization: Bearer $ACCESS_TOKEN" 2>/dev/null`
