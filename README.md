@@ -11,7 +11,7 @@ Also, do it with bash. Like real women do.
 - your own custom little twitter app created on the twitter developer dashboard, <https://developer.twitter.com/en/portal/dashboard/>
   - configure for oauth2 authorization, as a confidential client
   - set the callback URL to `http://localhost:1666/`
-  - generated and copy the client ID and client secret
+  - generate and copy the client ID and client secret
 
 - bash, curl, nc and jq installed on your system
 
