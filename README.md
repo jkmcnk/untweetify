@@ -6,11 +6,11 @@ Also, do it with bash. Like real women do.
 
 ## Prerequisites
 
-- an archive of your twitter data, in the form of a zip, delivered to you by twitter upon request at <https://twitter.com/settings/download_your_data>, unpacked. It's the data/tweets.js and data/tweets-part*.js files that are of interest to us.
+- an archive of your twitter data, in the form of a zip, delivered to you by twitter upon request at <https://twitter.com/settings/download_your_data>, unpacked. It's the `data/tweets.js` and `data/tweets-part*.js` files that are of interest to us.
 
 - your own custom little twitter app created on the twitter developer dashboard, <https://developer.twitter.com/en/portal/dashboard/>
   - configure for oauth2 authorization, as a confidential client
-  - set the callback URL to http://localhost:1666/
+  - set the callback URL to `http://localhost:1666/`
   - generated and copy the client ID and client secret
 
 - bash, curl, nc and jq installed on your system
@@ -64,7 +64,7 @@ Run
 bash untweetify.sh nuke
 ```
 
-It will run a long while, as you are only allowed to delete 50 tweets every 15 minutes. Run this in a `screen` session or somesuch.
+It will run a long while, as you are rate limited to deleting at most 50 tweets every 15 minutes. By default we do 45 tweets every 16 minutes as rate limiting never really works fine. Run this in a `screen` session or somesuch.
 
 Once it's done, all the IDs of the tweets deleted are in `deleted.txt`, and there's also a file `failed.txt` that contains the IDs of the tweets that failed to be deleted.
 
