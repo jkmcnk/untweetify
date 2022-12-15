@@ -10,7 +10,8 @@ BASIC_AUTH=`echo -n "$TW_CLIENT_ID:$TW_CLIENT_SECRET"|base64 -w0`
 if [ "$1" = "auth" ]; then
   touch code.txt
   chmod 0600 code.txt
-  nc -l localhost 1666 1>code.txt 2>&1 &
+  mkfifo response.pipe
+  cat response.pipe | nc -l localhost 1666 1>code.txt 2>&1 &
   NCPID=$!
   CHALLENGE=`dd if=/dev/random bs=16 count=1|base64|sed -re 's/[\/+=]/x/g'`
   URL="https://twitter.com/i/oauth2/authorize?response_type=code&client_id=$TW_CLIENT_ID&redirect_uri=http://localhost:1666/&scope=tweet.read%20users.read%20tweet.write%20offline.access&state=state&code_challenge=$CHALLENGE&code_challenge_method=plain"
@@ -27,11 +28,37 @@ if [ "$1" = "auth" ]; then
     fi
   done
 
-  kill $NCPID
   if [ -z "$CODE" ]; then
     echo "Failed to get authorization code."
+    cat <<EOF >response.pipe
+HTTP/1.1 200 OK
+Cache-Control: no-cache
+Connection: close
+Content-Type: text/html
+
+<html><body><h1>Untweetify Not Authorized</h1>
+Authorization seems to have failed. :(
+</body></html>
+EOF
+    sleep 1
+    kill $NCPID
+    rm response.pipe
     exit 2
   fi
+
+  cat <<EOF >response.pipe
+HTTP/1.1 200 OK
+Cache-Control: no-cache
+Connection: close
+Content-Type: text/html
+
+<html><body><h1>Untweetify Authorized</h1>
+Yay. I am now authenticated and ready to nuke your tweets.
+</body></html>
+EOF
+  sleep 1
+  kill $NCPID
+  rm response.pipe
 
   rm -f code.txt
   touch auth.json
@@ -67,7 +94,6 @@ elif [ "$1" = "prep" ]; then
   touch deleted.txt
   exit 0
 elif [ "$1" = "nuke" ]; then
-  # the delete request rate limit is 50/15min
   if ! [ -f auth.json ]; then
     echo "You need to authenticate first."
     exit 1
