@@ -6,7 +6,7 @@ Also, do it with bash. Like real women do.
 
 ## Prerequisites
 
-- an archive of your twitter data, in the form of a zip, delivered to you by twitter upon request at <https://twitter.com/settings/download_your_data>, unpacked. It's the `data/tweets.js` and `data/tweets-part*.js` files that are of interest to us.
+- an archive of your twitter data, in the form of a zip, delivered to you by twitter upon request at <https://twitter.com/settings/download_your_data>, unpacked. It's the `data/tweets.js` and `data/tweets-part*.js` files that are of interest to us, since we will extract each and every tweet's ID from them, as twitter API only gives us access to the most recent 3200 or so tweets.
 
 - your own custom little twitter app created on the twitter developer dashboard, <https://developer.twitter.com/en/portal/dashboard/>
   - configure for oauth2 authorization, as a confidential client
@@ -37,7 +37,7 @@ It should open a browser (or give you the URL to open manually) with a page wher
 Yay. I am now authenticated and ready to nuke your tweets.
 ```
 
-Never mind that your browser probably complained about the redirect page not working. We just didn't bother to send anything back to the browser once we got the authentication data.
+In both the browser and console.
 
 ## Prepare
 
